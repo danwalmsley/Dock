@@ -14,7 +14,6 @@
     </Border>
   </Design.PreviewWith>
 
-
   <ContextMenu x:Key="DocumentTabStripItemContextMenu">
     <MenuItem Header="{DynamicResource DocumentTabStripItemFloatString}"
               Command="{Binding Owner.Factory.FloatDockable}"
@@ -165,12 +164,9 @@
   
   <ControlTheme x:Key="{x:Type DocumentTabStripItem}" TargetType="DocumentTabStripItem">
 
-    <Setter Property="(DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
-    <Setter Property="(DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
-
     <Setter Property="(TextElement.FontSize)" Value="{DynamicResource DockFontSizeNormal}" />
     <Setter Property="FontWeight" Value="Normal" />
-    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="MinHeight" Value="28" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource DockThemeForegroundBrush}" />
@@ -178,6 +174,7 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Margin" Value="0" />
     <Setter Property="Padding" Value="4 0 4 0" />
+    <Setter Property="CornerRadius" Value="8" />
 
     <Setter Property="Template">
       <ControlTemplate>
@@ -188,6 +185,7 @@
                   BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
                   Padding="{TemplateBinding Padding}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
                   ContextMenu="{DynamicResource DocumentTabStripItemContextMenu}">
             <DockableControl TrackingMode="Tab">
               <StackPanel Background="Transparent"
@@ -196,7 +194,7 @@
                           DockProperties.IsDragArea="True"
                           DockProperties.IsDropArea="True">
                 <Panel Margin="2">
-                  <ContentPresenter ContentTemplate="{Binding $parent[DocumentControl].HeaderTemplate}"
+                  <ContentPresenter VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" ContentTemplate="{Binding $parent[DocumentControl].HeaderTemplate}"
                                     Content="{Binding}" />
                 </Panel>
                 <Button x:Name="PART_CloseButton"
@@ -230,7 +228,8 @@
                         <Setter Property="Margin" Value="2" />
                         <Setter Property="Stretch" Value="Uniform" />
                         <Setter Property="UseLayoutRounding" Value="False" />
-                        <Setter Property="Data" Value="{DynamicResource DockIconCloseGeometry}" />
+                        <Setter Property="Data"
+                                Value="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
                       </Style>
                     </Path.Styles>
                   </Path>
@@ -255,17 +254,17 @@
     </Style>
 
     <Style Selector="^:active:selected">
-      <Setter Property="Background" Value="{DynamicResource DockApplicationAccentBrushLow}" />
+      <Setter Property="Background" Value="{DynamicResource swButtonBackgroundColor}" />
       <Setter Property="Foreground" Value="{DynamicResource DockApplicationAccentForegroundBrush}" />
     </Style>
 
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource DockApplicationAccentBrushMed}" />
+      <Setter Property="Background" Value="{DynamicResource swButtonBackgroundColor}" />
       <Setter Property="Foreground" Value="{DynamicResource DockApplicationAccentForegroundBrush}" />
     </Style>
 
     <Style Selector="^:selected:pointerover">
-      <Setter Property="Background" Value="{DynamicResource DockApplicationAccentBrushLow}" />
+      <Setter Property="Background" Value="{DynamicResource swButtonFillPointerOverBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource DockApplicationAccentForegroundBrush}" />
     </Style>
 

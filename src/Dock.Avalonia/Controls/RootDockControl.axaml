@@ -9,14 +9,10 @@
 
   <ControlTheme x:Key="{x:Type RootDockControl}" TargetType="RootDockControl">
 
-    <Setter Property="(DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
-    <Setter Property="(DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
-
     <Setter Property="Template">
       <ControlTemplate>
         <DockableControl TrackingMode="Visible">
-          <DockPanel Background="Transparent"
-                     DockProperties.IsDropArea="False">
+          <DockPanel DockProperties.IsDropArea="False">
             <ToolPinnedControl DockPanel.Dock="Left" 
                                Orientation="Vertical"
                                Items="{Binding LeftPinnedDockables}"

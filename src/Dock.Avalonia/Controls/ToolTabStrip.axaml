@@ -15,9 +15,6 @@
 
   <ControlTheme x:Key="{x:Type ToolTabStrip}" TargetType="ToolTabStrip">
 
-    <Setter Property="(DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
-    <Setter Property="(DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
-
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Focusable" Value="False" />
     <Setter Property="ClipToBounds" Value="False" />
@@ -36,7 +33,7 @@
             <ItemsPresenter Name="PART_ItemsPresenter"
                             ItemsPanel="{TemplateBinding ItemsPanel}"/>
           </Border>
-          <Border Name="PART_BorderFill" DockProperties.IsDropArea="True" />
+          <Border Name="PART_BorderFill" />
         </DockPanel>
       </ControlTemplate>
     </Setter>
@@ -52,7 +49,6 @@
     </Style>
 
     <Style Selector="^/template/ Border#PART_BorderFill">
-      <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="{DynamicResource DockThemeBorderLowBrush}" />
       <Setter Property="BorderThickness" Value="0 1 0  0" />
     </Style>
