@@ -579,6 +579,8 @@ public abstract partial class FactoryBase
 
         dock.GetPointerScreenPosition(out var dockPointerScreenX, out var dockPointerScreenY);
         dockable.GetPointerScreenPosition(out var dockablePointerScreenX, out var dockablePointerScreenY);
+        dockable.GetPointerPosition(out var pointerX, out var pointerY);
+        dockable.GetTabBounds(out var tabX, out var tabY, out _, out _);
 
         if (double.IsNaN(dockablePointerScreenX))
         {
@@ -604,9 +606,17 @@ public abstract partial class FactoryBase
         {
             dockableWidth = double.IsNaN(ownerWidth) ? 300 : ownerWidth;
         }
+
         if (double.IsNaN(dockableHeight))
         {
             dockableHeight = double.IsNaN(ownerHeight) ? 400 : ownerHeight;
+        }
+
+        if (!double.IsNaN(pointerX) && !double.IsNaN(pointerY) &&
+            !double.IsNaN(tabX) && !double.IsNaN(tabY))
+        {
+            dockablePointerScreenX -= pointerX + tabX;
+            dockablePointerScreenY -= pointerY + tabY;
         }
 
         SplitToWindow(dock, dockable, dockablePointerScreenX, dockablePointerScreenY, dockableWidth, dockableHeight);

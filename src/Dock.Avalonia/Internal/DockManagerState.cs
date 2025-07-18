@@ -110,10 +110,17 @@ internal abstract class DockManagerState : IDockManagerState
     }
 
 
-    protected static void Float(Point point, DockControl inputActiveDockControl, IDockable dockable, IFactory factory)
+    protected static void Float(
+        Point point,
+        DockControl inputActiveDockControl,
+        IDockable dockable,
+        IFactory factory,
+        PixelPoint dragOffset)
     {
         var screen = inputActiveDockControl.PointToScreen(point);
-        dockable.SetPointerScreenPosition(screen.X, screen.Y);
+        dockable.SetPointerScreenPosition(
+            screen.X + dragOffset.X,
+            screen.Y + dragOffset.Y);
         factory.FloatDockable(dockable);
     }
 }

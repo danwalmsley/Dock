@@ -142,7 +142,16 @@ internal class DockControlState : DockManagerState, IDockControlState
             if (_context.DragControl.DataContext is IDockable sourceDockable &&
                 DropControl.DataContext is IDockable targetDockable)
             {
-                Execute(point, localOperation, dragAction, relativeTo, sourceDockable, targetDockable);
+                if (localOperation == DockOperation.Window &&
+                    relativeTo is DockControl dockCtrl &&
+                    dockCtrl.Layout?.Factory is { } factory)
+                {
+                    Float(point, dockCtrl, sourceDockable, factory, _context.DragOffset);
+                }
+                else
+                {
+                    Execute(point, localOperation, dragAction, relativeTo, sourceDockable, targetDockable);
+                }
             }
         }
     }
@@ -292,7 +301,7 @@ internal class DockControlState : DockManagerState, IDockControlState
                     if (!executed && _context.DragControl?.DataContext is IDockable dockable &&
                         inputActiveDockControl.Layout?.Factory is { } factory)
                     {
-                        Float(point, inputActiveDockControl, dockable, factory);
+                        Float(point, inputActiveDockControl, dockable, factory, _context.DragOffset);
                     }
                 }
 
