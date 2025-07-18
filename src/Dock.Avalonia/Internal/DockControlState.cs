@@ -292,7 +292,7 @@ internal class DockControlState : DockManagerState, IDockControlState
                     if (!executed && _context.DragControl?.DataContext is IDockable dockable &&
                         inputActiveDockControl.Layout?.Factory is { } factory)
                     {
-                        Float(point, inputActiveDockControl, dockable, factory);
+                        Float(point, inputActiveDockControl, dockable, factory, _context.DragOffset);
                     }
                 }
 
