@@ -32,6 +32,12 @@ public class DockFactory : Factory
         var document1 = new DocumentViewModel {Id = "Document1", Title = "Document1"};
         var document2 = new DocumentViewModel {Id = "Document2", Title = "Document2"};
         var document3 = new DocumentViewModel {Id = "Document3", Title = "Document3", CanClose = true};
+        var document4 = new DocumentViewModel {Id = "Document4", Title = "Document4"};
+        var document5 = new DocumentViewModel {Id = "Document5", Title = "Document5"};
+        var document6 = new DocumentViewModel {Id = "Document6", Title = "Document6"};
+        var document7 = new DocumentViewModel {Id = "Document7", Title = "Document7"};
+        var document8 = new DocumentViewModel {Id = "Document8", Title = "Document8"};
+        var document9 = new DocumentViewModel {Id = "Document9", Title = "Document9"};
         var tool1 = new Tool1ViewModel {Id = "Tool1", Title = "Tool1"};
         var tool2 = new Tool2ViewModel {Id = "Tool2", Title = "Tool2"};
         var tool3 = new Tool3ViewModel {Id = "Tool3", Title = "Tool3", CanDrag = false };
@@ -41,7 +47,7 @@ public class DockFactory : Factory
         var tool7 = new Tool7ViewModel {Id = "Tool7", Title = "Tool7", CanClose = false, CanPin = false};
         var tool8 = new Tool8ViewModel {Id = "Tool8", Title = "Tool8", CanClose = false, CanPin = true};
 
-        var leftDock = new ProportionalDock
+        /*var leftDock = new ProportionalDock
         {
             Proportion = 0.25,
             Orientation = Orientation.Vertical,
@@ -97,32 +103,21 @@ public class DockFactory : Factory
                 }
             ),
             // CanDrop = false
-        };
+        };*/
 
         var documentDock = new CustomDocumentDock
         {
             // DockGroup = "CustomDocumentDock",
             IsCollapsable = false,
             ActiveDockable = document1,
-            VisibleDockables = CreateList<IDockable>(document1, document2, document3),
+            VisibleDockables = CreateList<IDockable>(document1, document2, document3, document4, document5, document6, document7, document8, document9),
             CanCreateDocument = true,
             // CanDrop = false,
             EnableWindowDrag = true,
             // CanCloseLastDockable = false,
         };
 
-        var mainLayout = new ProportionalDock
-        {
-            Orientation = Orientation.Horizontal,
-            VisibleDockables = CreateList<IDockable>
-            (
-                leftDock,
-                new ProportionalDockSplitter { ResizePreview = true },
-                documentDock,
-                new ProportionalDockSplitter(),
-                rightDock
-            )
-        };
+        var mainLayout = documentDock;
 
         var dashboardView = new DashboardViewModel
         {
