@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dock.Model.Controls;
 using Dock.Model.Core;
 
@@ -114,112 +115,151 @@ public abstract partial class FactoryBase : IFactory
     /// <inheritdoc/>
     public virtual IDock CreateSplitLayout(IDock dock, IDockable dockable, DockOperation operation)
     {
-        IDock? split;
-
-        if (dockable is IDock dockableDock)
+        // If the dock is already a ProportionalDock, we can add directly to it
+        if (dock is IProportionalDock proportionalDock)
         {
-            split = dockableDock;
-        }
-        else
-        {
-            split = CreateProportionalDock();
-            split.Title = nameof(IProportionalDock);
-            split.VisibleDockables = CreateList<IDockable>();
-            if (split.VisibleDockables is not null)
-            {
-                AddVisibleDockable(split, dockable);
-                OnDockableAdded(dockable);
-                split.ActiveDockable = dockable;
-            }
+            return AddToExistingProportionalDock(proportionalDock, dockable, operation);
         }
 
-        var containerProportion = dock.Proportion;
-        dock.Proportion = double.NaN;
+        // Otherwise, create a new proportional dock as before
+        return CreateNewProportionalDock(dock, dockable, operation);
+    }
 
-        var layout = CreateProportionalDock();
-        layout.Title = nameof(IProportionalDock);
-        layout.VisibleDockables = CreateList<IDockable>();
-        layout.Proportion = containerProportion;
+    private IDock AddToExistingProportionalDock(IProportionalDock dock, IDockable dockable, DockOperation operation)
+    {
+        var orientation = GetOrientationFromOperation(operation);
+        
+        // If orientations don't match, we still need to create a nested dock
+        if (dock.Orientation != orientation)
+        {
+            return CreateNewProportionalDock(dock, dockable, operation);
+        }
 
+        // Find the insertion point based on the operation
+        var insertionIndex = GetInsertionIndex(dock, operation);
+        
+        // Create a splitter
         var splitter = CreateProportionalDockSplitter();
-        splitter.Title = nameof(IProportionalDockSplitter);
-
-        switch (operation)
+        
+        // Calculate proportions - distribute evenly among all children
+        var totalChildren = dock.VisibleDockables?.Count ?? 0;
+        var newProportion = 1.0 / (totalChildren + 1); // +1 for the new dockable
+        
+        // Adjust existing children proportions
+        if (dock.VisibleDockables != null)
         {
-            case DockOperation.Left:
-            case DockOperation.Right:
+            foreach (var child in dock.VisibleDockables)
             {
-                layout.Orientation = Orientation.Horizontal;
-                break;
+                var currentProportion = child.Proportion;
+                var adjustedProportion = currentProportion * (1.0 - newProportion);
+                child.Proportion = adjustedProportion;
             }
-            case DockOperation.Top:
-            case DockOperation.Bottom:
+        }
+        
+        // Set proportion for the new dockable
+        dockable.Proportion = newProportion;
+        
+        // Insert the splitter and dockable at the correct positions
+        if (operation == DockOperation.Left || operation == DockOperation.Top)
+        {
+            dock.VisibleDockables?.Insert(insertionIndex, dockable);
+            if (dock.VisibleDockables?.Count > 1)
             {
-                layout.Orientation = Orientation.Vertical;
-                break;
+                dock.VisibleDockables?.Insert(insertionIndex + 1, splitter);
+            }
+        }
+        else // Right or Bottom
+        {
+            if (dock.VisibleDockables?.Count > 0)
+            {
+                dock.VisibleDockables?.Insert(insertionIndex, splitter);
+                dock.VisibleDockables?.Insert(insertionIndex + 1, dockable);
+            }
+            else
+            {
+                dock.VisibleDockables?.Add(dockable);
             }
         }
 
+        return dock;
+    }
+
+    private IDock CreateNewProportionalDock(IDock dock, IDockable dockable, DockOperation operation)
+    {
+        var orientation = GetOrientationFromOperation(operation);
+        
+        // Check if the dock's owner is already a ProportionalDock
+        if (dock.Owner is IProportionalDock existingProportionalDock)
+        {
+            // Find the index of the current dock
+            var dockIndex = existingProportionalDock.VisibleDockables?.IndexOf(dock) ?? -1;
+            if (dockIndex >= 0)
+            {
+                // Create a splitter
+                var splitter1 = CreateProportionalDockSplitter();
+                
+                // Insert splitter and dockable after the existing dock
+                existingProportionalDock.VisibleDockables?.Insert(dockIndex + 1, splitter1);
+                existingProportionalDock.VisibleDockables?.Insert(dockIndex + 2, dockable);
+                
+                InitDockable(splitter1, existingProportionalDock);
+                InitDockable(dockable, existingProportionalDock);
+                
+                // Adjust proportions
+                var equalProportion1 = 0.5;
+                dock.Proportion = equalProportion1;
+                dockable.Proportion = equalProportion1;
+            }
+            
+            return existingProportionalDock;
+        }
+        
+        // Create new ProportionalDock only if owner isn't already one
+        var proportionalDock = CreateProportionalDock();
+        proportionalDock.VisibleDockables = CreateList<IDockable>();
+        proportionalDock.Orientation = orientation;
+        proportionalDock.Proportion = dock.Proportion;
+        
+        // Create a splitter
+        var splitter = CreateProportionalDockSplitter();
+        
+        proportionalDock.Owner = dock.Owner;
+        // Add in order: dock, splitter, dockable
+        proportionalDock.VisibleDockables?.Add(dock);
+        proportionalDock.VisibleDockables?.Add(splitter);
+        proportionalDock.VisibleDockables?.Add(dockable);
+        
+        InitDockable(dock, proportionalDock);
+        InitDockable(splitter, proportionalDock);
+        InitDockable(dockable, proportionalDock);
+        
+        // Set equal proportions for both dockables
+        var equalProportion = 0.5;
+        dock.Proportion = equalProportion;
+        dockable.Proportion = equalProportion;
+        
+        return proportionalDock;
+    }
+
+    private int GetInsertionIndex(IProportionalDock dock, DockOperation operation)
+    {
         switch (operation)
         {
             case DockOperation.Left:
             case DockOperation.Top:
-            {
-                if (layout.VisibleDockables is not null)
-                {
-                    AddVisibleDockable(layout, split);
-                    OnDockableAdded(split);
-                    layout.ActiveDockable = split;
-                }
-
-                break;
-            }
+                return 0;
             case DockOperation.Right:
             case DockOperation.Bottom:
-            {
-                if (layout.VisibleDockables is not null)
-                {
-                    AddVisibleDockable(layout, dock);
-                    OnDockableAdded(dock);
-                    layout.ActiveDockable = dock;
-                }
-
-                break;
-            }
+            default:
+                return dock.VisibleDockables?.Count ?? 0;
         }
+    }
 
-        AddVisibleDockable(layout, splitter);
-        OnDockableAdded(splitter);
-
-        switch (operation)
-        {
-            case DockOperation.Left:
-            case DockOperation.Top:
-            {
-                if (layout.VisibleDockables is not null)
-                {
-                    AddVisibleDockable(layout, dock);
-                    OnDockableAdded(dock);
-                    layout.ActiveDockable = dock;
-                }
-
-                break;
-            }
-            case DockOperation.Right:
-            case DockOperation.Bottom:
-            {
-                if (layout.VisibleDockables is not null)
-                {
-                    AddVisibleDockable(layout, split);
-                    OnDockableAdded(split);
-                    layout.ActiveDockable = split;
-                }
-
-                break;
-            }
-        }
-
-        return layout;
+    private Orientation GetOrientationFromOperation(DockOperation operation)
+    {
+        return operation == DockOperation.Left || operation == DockOperation.Right 
+            ? Orientation.Horizontal 
+            : Orientation.Vertical;
     }
 
     /// <inheritdoc/>
@@ -238,13 +278,22 @@ public abstract partial class FactoryBase : IFactory
                     if (index >= 0)
                     {
                         var layout = CreateSplitLayout(dock, dockable, operation);
-                        RemoveVisibleDockableAt(ownerDock, index);
-                        OnDockableRemoved(dockable);
-                        OnDockableUndocked(dockable, operation);
-                        InsertVisibleDockable(ownerDock, index, layout);
-                        OnDockableAdded(dockable);
-                        InitDockable(layout, ownerDock);
-                        ownerDock.ActiveDockable = layout;
+                        
+                        if (layout != ownerDock)
+                        {
+                            RemoveVisibleDockableAt(ownerDock, index);
+                            OnDockableRemoved(dockable);
+                            OnDockableUndocked(dockable, operation);
+                            InsertVisibleDockable(ownerDock, index, layout);
+                            OnDockableAdded(dockable);
+                            InitDockable(layout, ownerDock);
+                            ownerDock.ActiveDockable = layout;
+                        }
+                        else
+                        {
+                            //ownerDock.ActiveDockable = dockable;
+                        }
+                        
                         OnDockableDocked(dockable, operation);
                     }
                 }
