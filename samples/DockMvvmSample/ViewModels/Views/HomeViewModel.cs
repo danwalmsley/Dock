@@ -4,4 +4,6 @@ namespace DockMvvmSample.ViewModels.Views;
 
 public class HomeViewModel : RootDock
 {
+    
+    
 }

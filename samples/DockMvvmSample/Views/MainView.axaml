@@ -69,8 +69,11 @@
         </Button>
       </Grid>
     </Panel>
-    <DockControl x:Name="DockControl" Layout="{Binding Layout}" Margin="4"
-                     Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+    <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+      <ContentControl Content="{Binding DansTool}" VerticalAlignment="Center" />
+      <DockControl x:Name="DockControl" Layout="{Binding Layout}" Margin="4" />
+    </DockPanel>
+    
     <Panel DataContext="{Binding Layout.ActiveDockable}"
            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
       <TextBlock Text="{Binding FocusedDockable, FallbackValue={}}"

@@ -19,6 +19,8 @@ public class MainWindowViewModel : ObservableObject
         set => SetProperty(ref _layout, value);
     }
 
+    public DansToolViewModel DansTool { get; } = new DansToolViewModel();
+
     public ICommand NewLayout { get; }
 
     public MainWindowViewModel()
