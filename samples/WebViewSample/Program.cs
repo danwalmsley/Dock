@@ -14,7 +14,7 @@ internal class Program
         WebView.Settings.OsrEnabled = false;
 
         DockSettings.UseFloatingDockAdorner = true;
-        DockSettings.EnableGlobalDocking = true;
+        // Global docking is now configured per root dock via IRootDock.EnableGlobalDocking
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }

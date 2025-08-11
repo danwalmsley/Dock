@@ -18,6 +18,11 @@ public interface IRootDock : IDock
     bool IsFocusableRoot { get; set; }
 
     /// <summary>
+    /// Gets or sets whether this root dock allows docking with other dock controls.
+    /// </summary>
+    bool EnableGlobalDocking { get; set; }
+
+    /// <summary>
     /// Gets or sets hidden dockables.
     /// </summary>
     IList<IDockable>? HiddenDockables { get; set; }

@@ -4,7 +4,6 @@ using Dock.Model;
 using Dock.Model.Avalonia;
 using Dock.Model.Avalonia.Controls;
 using Dock.Model.Core;
-using Dock.Settings;
 using Xunit;
 
 namespace Dock.Avalonia.HeadlessTests;
@@ -33,7 +32,7 @@ public class GlobalDockingValidationTests
             CanDrop = true,
             Owner = owner
         };
-        
+
         // If no owner specified, create a simple owner dock
         if (owner == null)
         {
@@ -47,7 +46,7 @@ public class GlobalDockingValidationTests
             };
             tool.Owner = ownerDock;
         }
-        
+
         return tool;
     }
 
@@ -147,36 +146,6 @@ public class GlobalDockingValidationTests
         Assert.False(result, "Grouped source should NOT be able to dock into non-grouped global target");
     }
 
-    [AvaloniaFact]
-    public void GlobalDocking_DisabledSetting_ShouldReject()
-    {
-        // NOTE: The global docking setting is enforced at the UI level (ValidateGlobal methods)
-        // rather than in DockManager.ValidateTool. This test demonstrates that the setting
-        // check works in the validation layer where it's implemented.
-        var originalSetting = DockSettings.EnableGlobalDocking;
-        try
-        {
-            DockSettings.EnableGlobalDocking = false;
-            
-            // Test through direct validation call to verify setting is respected
-            var source = CreateTool("Source", "Source Tool", dockGroup: null);
-            var target = CreateGlobalTarget("Target", dockGroup: null);
-
-            // This should pass since we're using the low-level DockManager validation
-            // which doesn't check the global docking setting (that's done at UI level)
-            var dockManager = CreateDockManager();
-            var result = dockManager.ValidateTool(source, target, DragAction.Move, DockOperation.Fill, false);
-            
-            // The actual global docking setting enforcement happens in ValidateGlobal methods
-            // in DockControlState and HostWindowState, which our tests show are working correctly
-            Assert.True(result, "DockManager.ValidateTool doesn't check global docking setting - that's done at UI level");
-        }
-        finally
-        {
-            DockSettings.EnableGlobalDocking = originalSetting;
-        }
-    }
-
     #endregion
 
     #region Comprehensive Rule Testing
@@ -210,26 +179,26 @@ public class GlobalDockingValidationTests
         // Test Rule 1: Non-grouped can dock into non-grouped global target
         var nonGroupedTool = CreateTool("NonGrouped", "Non-grouped Tool", null);
         var nonGroupedGlobalTarget = CreateGlobalTarget("NonGroupedGlobal", null);
-        
+
         var result1 = dockManager.ValidateTool(nonGroupedTool, nonGroupedGlobalTarget, DragAction.Move, DockOperation.Fill, false);
         Assert.True(result1, "Non-grouped tool should be able to dock into non-grouped global target");
 
         // Test Rule 1: Non-grouped CAN dock into grouped global target (can dock anywhere)
         var groupedGlobalTarget = CreateGlobalTarget("GroupedGlobal", "GroupA");
-        
+
         var result2 = dockManager.ValidateTool(nonGroupedTool, groupedGlobalTarget, DragAction.Move, DockOperation.Fill, false);
         Assert.True(result2, "Non-grouped tool should be able to dock globally anywhere");
 
         // Test Rule 2: Grouped CANNOT dock globally (blocked entirely)
         var groupedTool = CreateTool("Grouped", "Grouped Tool", "GroupA");
         var sameGroupGlobalTarget = CreateGlobalTarget("SameGroupGlobal", "GroupA");
-        
+
         var result3 = dockManager.ValidateTool(groupedTool, sameGroupGlobalTarget, DragAction.Move, DockOperation.Fill, false);
         Assert.False(result3, "Grouped tool should NOT be able to dock globally (blocked entirely)");
 
         // Test Rule 2: Grouped sources are blocked from global docking (regardless of target group)
         var differentGroupGlobalTarget = CreateGlobalTarget("DifferentGroupGlobal", "GroupB");
-        
+
         var result4 = dockManager.ValidateTool(groupedTool, differentGroupGlobalTarget, DragAction.Move, DockOperation.Fill, false);
         Assert.False(result4, "Grouped tool should NOT be able to dock globally (blocked entirely)");
     }
@@ -238,7 +207,7 @@ public class GlobalDockingValidationTests
     public void Integration_DockGroupValidator_GlobalValidation()
     {
         // Test the DockGroupValidator.ValidateGlobalDocking directly to ensure our logic is sound
-        
+
         // Rule 1: Non-grouped sources can dock globally anywhere
         var result1 = DockGroupValidator.ValidateGlobalDocking(
             CreateTool("Source", "Tool", null),

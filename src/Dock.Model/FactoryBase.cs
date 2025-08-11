@@ -41,25 +41,25 @@ public abstract partial class FactoryBase : IFactory
         {
             if (dock is IToolDock toolDock)
             {
-                if (toolDock.Alignment == Alignment.Left 
+                if (toolDock.Alignment == Alignment.Left
                     && IsDockPinned(rootDock.LeftPinnedDockables, dock))
                 {
                     return;
                 }
 
-                if (toolDock.Alignment == Alignment.Right 
+                if (toolDock.Alignment == Alignment.Right
                     && IsDockPinned(rootDock.RightPinnedDockables, dock))
                 {
                     return;
                 }
 
-                if (toolDock.Alignment == Alignment.Top 
+                if (toolDock.Alignment == Alignment.Top
                     && IsDockPinned(rootDock.TopPinnedDockables, dock))
                 {
                     return;
                 }
 
-                if (toolDock.Alignment == Alignment.Bottom 
+                if (toolDock.Alignment == Alignment.Bottom
                     && IsDockPinned(rootDock.BottomPinnedDockables, dock))
                 {
                     return;
@@ -148,44 +148,44 @@ public abstract partial class FactoryBase : IFactory
         {
             case DockOperation.Left:
             case DockOperation.Right:
-            {
-                layout.Orientation = Orientation.Horizontal;
-                break;
-            }
+                {
+                    layout.Orientation = Orientation.Horizontal;
+                    break;
+                }
             case DockOperation.Top:
             case DockOperation.Bottom:
-            {
-                layout.Orientation = Orientation.Vertical;
-                break;
-            }
+                {
+                    layout.Orientation = Orientation.Vertical;
+                    break;
+                }
         }
 
         switch (operation)
         {
             case DockOperation.Left:
             case DockOperation.Top:
-            {
-                if (layout.VisibleDockables is not null)
                 {
-                    AddVisibleDockable(layout, split);
-                    OnDockableAdded(split);
-                    layout.ActiveDockable = split;
-                }
+                    if (layout.VisibleDockables is not null)
+                    {
+                        AddVisibleDockable(layout, split);
+                        OnDockableAdded(split);
+                        layout.ActiveDockable = split;
+                    }
 
-                break;
-            }
+                    break;
+                }
             case DockOperation.Right:
             case DockOperation.Bottom:
-            {
-                if (layout.VisibleDockables is not null)
                 {
-                    AddVisibleDockable(layout, dock);
-                    OnDockableAdded(dock);
-                    layout.ActiveDockable = dock;
-                }
+                    if (layout.VisibleDockables is not null)
+                    {
+                        AddVisibleDockable(layout, dock);
+                        OnDockableAdded(dock);
+                        layout.ActiveDockable = dock;
+                    }
 
-                break;
-            }
+                    break;
+                }
         }
 
         AddVisibleDockable(layout, splitter);
@@ -195,28 +195,28 @@ public abstract partial class FactoryBase : IFactory
         {
             case DockOperation.Left:
             case DockOperation.Top:
-            {
-                if (layout.VisibleDockables is not null)
                 {
-                    AddVisibleDockable(layout, dock);
-                    OnDockableAdded(dock);
-                    layout.ActiveDockable = dock;
-                }
+                    if (layout.VisibleDockables is not null)
+                    {
+                        AddVisibleDockable(layout, dock);
+                        OnDockableAdded(dock);
+                        layout.ActiveDockable = dock;
+                    }
 
-                break;
-            }
+                    break;
+                }
             case DockOperation.Right:
             case DockOperation.Bottom:
-            {
-                if (layout.VisibleDockables is not null)
                 {
-                    AddVisibleDockable(layout, split);
-                    OnDockableAdded(split);
-                    layout.ActiveDockable = split;
-                }
+                    if (layout.VisibleDockables is not null)
+                    {
+                        AddVisibleDockable(layout, split);
+                        OnDockableAdded(split);
+                        layout.ActiveDockable = split;
+                    }
 
-                break;
-            }
+                    break;
+                }
         }
 
         return layout;
@@ -231,102 +231,102 @@ public abstract partial class FactoryBase : IFactory
             case DockOperation.Right:
             case DockOperation.Top:
             case DockOperation.Bottom:
-            {
-                if (dock.Owner is IDock ownerDock && ownerDock.VisibleDockables is { })
                 {
-                    var index = ownerDock.VisibleDockables.IndexOf(dock);
-                    if (index >= 0)
+                    if (dock.Owner is IDock ownerDock && ownerDock.VisibleDockables is { })
                     {
-                        // Check if the owner is already a ProportionalDock with compatible orientation
-                        if (ownerDock is IProportionalDock proportionalOwner)
+                        var index = ownerDock.VisibleDockables.IndexOf(dock);
+                        if (index >= 0)
                         {
-                            var requiredOrientation = operation switch
+                            // Check if the owner is already a ProportionalDock with compatible orientation
+                            if (ownerDock is IProportionalDock proportionalOwner)
                             {
-                                DockOperation.Left or DockOperation.Right => Orientation.Horizontal,
-                                DockOperation.Top or DockOperation.Bottom => Orientation.Vertical,
-                                _ => throw new NotSupportedException($"Not supported split operation: {operation}.")
-                            };
-
-                            // If the owner already has the required orientation, add directly to it
-                            if (proportionalOwner.Orientation == requiredOrientation)
-                            {
-                                IDock? split;
-
-                                if (dockable is IDock dockableDock)
+                                var requiredOrientation = operation switch
                                 {
-                                    split = dockableDock;
-                                }
-                                else
+                                    DockOperation.Left or DockOperation.Right => Orientation.Horizontal,
+                                    DockOperation.Top or DockOperation.Bottom => Orientation.Vertical,
+                                    _ => throw new NotSupportedException($"Not supported split operation: {operation}.")
+                                };
+
+                                // If the owner already has the required orientation, add directly to it
+                                if (proportionalOwner.Orientation == requiredOrientation)
                                 {
-                                    split = CreateProportionalDock();
-                                    split.Title = nameof(IProportionalDock);
-                                    split.VisibleDockables = CreateList<IDockable>();
-                                    if (split.VisibleDockables is not null)
+                                    IDock? split;
+
+                                    if (dockable is IDock dockableDock)
                                     {
-                                        AddVisibleDockable(split, dockable);
-                                        OnDockableAdded(dockable);
-                                        split.ActiveDockable = dockable;
+                                        split = dockableDock;
                                     }
+                                    else
+                                    {
+                                        split = CreateProportionalDock();
+                                        split.Title = nameof(IProportionalDock);
+                                        split.VisibleDockables = CreateList<IDockable>();
+                                        if (split.VisibleDockables is not null)
+                                        {
+                                            AddVisibleDockable(split, dockable);
+                                            OnDockableAdded(dockable);
+                                            split.ActiveDockable = dockable;
+                                        }
+                                    }
+
+                                    var splitter = CreateProportionalDockSplitter();
+                                    splitter.Title = nameof(IProportionalDockSplitter);
+
+                                    // Store the original dock's proportion and split it equally
+                                    var originalProportion = dock.Proportion;
+                                    var halfProportion = double.IsNaN(originalProportion) ? double.NaN : originalProportion / 2.0;
+                                    dock.Proportion = halfProportion;
+                                    split.Proportion = halfProportion;
+
+                                    switch (operation)
+                                    {
+                                        case DockOperation.Left:
+                                        case DockOperation.Top:
+                                            {
+                                                // Insert split before dock
+                                                InsertVisibleDockable(proportionalOwner, index, split);
+                                                OnDockableAdded(split);
+                                                InsertVisibleDockable(proportionalOwner, index + 1, splitter);
+                                                OnDockableAdded(splitter);
+                                                InitDockable(split, proportionalOwner);
+                                                break;
+                                            }
+                                        case DockOperation.Right:
+                                        case DockOperation.Bottom:
+                                            {
+                                                // Insert split after dock
+                                                InsertVisibleDockable(proportionalOwner, index + 1, splitter);
+                                                OnDockableAdded(splitter);
+                                                InsertVisibleDockable(proportionalOwner, index + 2, split);
+                                                OnDockableAdded(split);
+                                                InitDockable(split, proportionalOwner);
+                                                break;
+                                            }
+                                    }
+
+                                    // Clean up any orphaned splitters that might have been created
+                                    CleanupOrphanedSplitters(proportionalOwner);
+
+                                    OnDockableUndocked(dockable, operation);
+                                    OnDockableDocked(dockable, operation);
+                                    return;
                                 }
-
-                                var splitter = CreateProportionalDockSplitter();
-                                splitter.Title = nameof(IProportionalDockSplitter);
-
-                                // Store the original dock's proportion and split it equally
-                                var originalProportion = dock.Proportion;
-                                var halfProportion = double.IsNaN(originalProportion) ? double.NaN : originalProportion / 2.0;
-                                dock.Proportion = halfProportion;
-                                split.Proportion = halfProportion;
-
-                                switch (operation)
-                                {
-                                    case DockOperation.Left:
-                                    case DockOperation.Top:
-                                    {
-                                        // Insert split before dock
-                                        InsertVisibleDockable(proportionalOwner, index, split);
-                                        OnDockableAdded(split);
-                                        InsertVisibleDockable(proportionalOwner, index + 1, splitter);
-                                        OnDockableAdded(splitter);
-                                        InitDockable(split, proportionalOwner);
-                                        break;
-                                    }
-                                    case DockOperation.Right:
-                                    case DockOperation.Bottom:
-                                    {
-                                        // Insert split after dock
-                                        InsertVisibleDockable(proportionalOwner, index + 1, splitter);
-                                        OnDockableAdded(splitter);
-                                        InsertVisibleDockable(proportionalOwner, index + 2, split);
-                                        OnDockableAdded(split);
-                                        InitDockable(split, proportionalOwner);
-                                        break;
-                                    }
-                                }
-
-                                // Clean up any orphaned splitters that might have been created
-                                CleanupOrphanedSplitters(proportionalOwner);
-
-                                OnDockableUndocked(dockable, operation);
-                                OnDockableDocked(dockable, operation);
-                                return;
                             }
-                        }
 
-                        // Fallback to the original behavior when optimization is not applicable
-                        var layout = CreateSplitLayout(dock, dockable, operation);
-                        RemoveVisibleDockableAt(ownerDock, index);
-                        OnDockableRemoved(dockable);
-                        OnDockableUndocked(dockable, operation);
-                        InsertVisibleDockable(ownerDock, index, layout);
-                        OnDockableAdded(dockable);
-                        InitDockable(layout, ownerDock);
-                        ownerDock.ActiveDockable = layout;
-                        OnDockableDocked(dockable, operation);
+                            // Fallback to the original behavior when optimization is not applicable
+                            var layout = CreateSplitLayout(dock, dockable, operation);
+                            RemoveVisibleDockableAt(ownerDock, index);
+                            OnDockableRemoved(dockable);
+                            OnDockableUndocked(dockable, operation);
+                            InsertVisibleDockable(ownerDock, index, layout);
+                            OnDockableAdded(dockable);
+                            InitDockable(layout, ownerDock);
+                            ownerDock.ActiveDockable = layout;
+                            OnDockableDocked(dockable, operation);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
             default:
                 throw new NotSupportedException($"Not supported split operation: {operation}.");
         }
@@ -340,86 +340,92 @@ public abstract partial class FactoryBase : IFactory
         switch (dockable)
         {
             case ITool:
-            {
-                target = CreateToolDock();
-                target.Title = nameof(IToolDock);
-                if (target is IDock dock)
                 {
-                    dock.VisibleDockables = CreateList<IDockable>();
-                    if (dock.VisibleDockables is not null)
+                    target = CreateToolDock();
+                    target.Title = nameof(IToolDock);
+                    if (target is IDock dock)
                     {
-                        AddVisibleDockable(dock, dockable);
-                        OnDockableAdded(dockable);
-                        dock.ActiveDockable = dockable;
-                    }
-                }
-                break;
-            }
-            case IDocument:
-            {
-                target = CreateDocumentDock();
-                target.Title = nameof(IDocumentDock);
-                if (target is IDock dock)
-                {
-                    dock.VisibleDockables = CreateList<IDockable>();
-                    if (dockable.Owner is IDocumentDock sourceDocumentDock)
-                    {
-                        if (target is IDocumentDock targetDocumentDock)
+                        dock.VisibleDockables = CreateList<IDockable>();
+                        if (dock.VisibleDockables is not null)
                         {
-                            targetDocumentDock.Id = sourceDocumentDock.Id;
-                            targetDocumentDock.CanCreateDocument = sourceDocumentDock.CanCreateDocument;
-                            targetDocumentDock.EnableWindowDrag = sourceDocumentDock.EnableWindowDrag;
-
-                            if (sourceDocumentDock is IDocumentDockContent sourceDocumentDockContent
-                                && targetDocumentDock is IDocumentDockContent targetDocumentDockContent)
-                            {
-                                
-                                targetDocumentDockContent.DocumentTemplate = sourceDocumentDockContent.DocumentTemplate;
-                            }
+                            AddVisibleDockable(dock, dockable);
+                            OnDockableAdded(dockable);
+                            dock.ActiveDockable = dockable;
                         }
                     }
-                    if (dock.VisibleDockables is not null)
-                    {
-                        AddVisibleDockable(dock, dockable);
-                        OnDockableAdded(dockable);
-                        dock.ActiveDockable = dockable;
-                    }
+                    break;
                 }
-                break;
-            }
+            case IDocument:
+                {
+                    target = CreateDocumentDock();
+                    target.Title = nameof(IDocumentDock);
+                    if (target is IDock dock)
+                    {
+                        dock.VisibleDockables = CreateList<IDockable>();
+                        if (dockable.Owner is IDocumentDock sourceDocumentDock)
+                        {
+                            if (target is IDocumentDock targetDocumentDock)
+                            {
+                                targetDocumentDock.Id = sourceDocumentDock.Id;
+                                targetDocumentDock.CanCreateDocument = sourceDocumentDock.CanCreateDocument;
+                                targetDocumentDock.EnableWindowDrag = sourceDocumentDock.EnableWindowDrag;
+
+                                if (sourceDocumentDock is IDocumentDockContent sourceDocumentDockContent
+                                    && targetDocumentDock is IDocumentDockContent targetDocumentDockContent)
+                                {
+
+                                    targetDocumentDockContent.DocumentTemplate = sourceDocumentDockContent.DocumentTemplate;
+                                }
+                            }
+                        }
+                        if (dock.VisibleDockables is not null)
+                        {
+                            AddVisibleDockable(dock, dockable);
+                            OnDockableAdded(dockable);
+                            dock.ActiveDockable = dockable;
+                        }
+                    }
+                    break;
+                }
             case IToolDock:
-            {
-                target = dockable;
-                break;
-            }
+                {
+                    target = dockable;
+                    break;
+                }
             case IDocumentDock:
-            {
-                target = dockable;
-                break;
-            }
+                {
+                    target = dockable;
+                    break;
+                }
             case IProportionalDock proportionalDock:
-            {
-                target = proportionalDock;
-                break;
-            }
+                {
+                    target = proportionalDock;
+                    break;
+                }
             case IDockDock dockDock:
-            {
-                target = dockDock;
-                break;
-            }
+                {
+                    target = dockDock;
+                    break;
+                }
             case IRootDock rootDock:
-            {
-                target = rootDock.ActiveDockable;
-                break;
-            }
+                {
+                    target = rootDock.ActiveDockable;
+                    break;
+                }
             default:
-            {
-                return null;
-            }
+                {
+                    return null;
+                }
         }
+
+        var sourceRoot = FindRoot(dockable, _ => true);
 
         var root = CreateRootDock();
         root.Title = nameof(IRootDock);
+        if (sourceRoot is not null)
+        {
+            root.EnableGlobalDocking = sourceRoot.EnableGlobalDocking;
+        }
         root.VisibleDockables = CreateList<IDockable>();
         if (root.VisibleDockables is not null && target is not null)
         {
