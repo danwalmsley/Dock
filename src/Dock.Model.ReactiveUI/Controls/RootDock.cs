@@ -22,6 +22,7 @@ public partial class RootDock : DockBase, IRootDock
     public RootDock()
     {
         _isFocusableRoot = true;
+        _enableGlobalDocking = true;
         ShowWindows = ReactiveCommand.Create(() => _navigateAdapter.ShowWindows());
         ExitWindows = ReactiveCommand.Create(() => _navigateAdapter.ExitWindows());
     }
@@ -29,6 +30,10 @@ public partial class RootDock : DockBase, IRootDock
     /// <inheritdoc/>
     [DataMember(IsRequired = false, EmitDefaultValue = true)]
     public partial bool IsFocusableRoot { get; set; }
+
+    /// <inheritdoc/>
+    [DataMember(IsRequired = false, EmitDefaultValue = true)]
+    public partial bool EnableGlobalDocking { get; set; }
 
     /// <inheritdoc/>
     [DataMember(IsRequired = false, EmitDefaultValue = true)]

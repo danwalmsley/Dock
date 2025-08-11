@@ -25,9 +25,19 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, bool> IsFocusableRootProperty =
         AvaloniaProperty.RegisterDirect<RootDock, bool>(
-            nameof(IsFocusableRoot), 
-            o => o.IsFocusableRoot, 
-            (o, v) => o.IsFocusableRoot = v, 
+            nameof(IsFocusableRoot),
+            o => o.IsFocusableRoot,
+            (o, v) => o.IsFocusableRoot = v,
+            true);
+
+    /// <summary>
+    /// Defines the <see cref="EnableGlobalDocking"/> property.
+    /// </summary>
+    public static readonly DirectProperty<RootDock, bool> EnableGlobalDockingProperty =
+        AvaloniaProperty.RegisterDirect<RootDock, bool>(
+            nameof(EnableGlobalDocking),
+            o => o.EnableGlobalDocking,
+            (o, v) => o.EnableGlobalDocking = v,
             true);
 
     /// <summary>
@@ -35,8 +45,8 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockable>?> HiddenDockablesProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockable>?>(
-            nameof(HiddenDockables), 
-            o => o.HiddenDockables, 
+            nameof(HiddenDockables),
+            o => o.HiddenDockables,
             (o, v) => o.HiddenDockables = v);
 
     /// <summary>
@@ -44,7 +54,7 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockable>?> LeftPinnedDockablesProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockable>?>(
-            nameof(LeftPinnedDockables), o => o.LeftPinnedDockables, 
+            nameof(LeftPinnedDockables), o => o.LeftPinnedDockables,
             (o, v) => o.LeftPinnedDockables = v);
 
     /// <summary>
@@ -60,7 +70,7 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockable>?> RightPinnedDockablesProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockable>?>(
-            nameof(RightPinnedDockables), o => o.RightPinnedDockables, 
+            nameof(RightPinnedDockables), o => o.RightPinnedDockables,
             (o, v) => o.RightPinnedDockables = v);
 
     /// <summary>
@@ -68,7 +78,7 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockable>?> TopPinnedDockablesProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockable>?>(
-            nameof(TopPinnedDockables), o => o.TopPinnedDockables, 
+            nameof(TopPinnedDockables), o => o.TopPinnedDockables,
             (o, v) => o.TopPinnedDockables = v);
 
     /// <summary>
@@ -76,7 +86,7 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockable>?> BottomPinnedDockablesProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockable>?>(
-            nameof(BottomPinnedDockables), o => o.BottomPinnedDockables, 
+            nameof(BottomPinnedDockables), o => o.BottomPinnedDockables,
             (o, v) => o.BottomPinnedDockables = v);
 
     /// <summary>
@@ -84,8 +94,8 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IDockWindow?> WindowProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IDockWindow?>(
-            nameof(Window), 
-            o => o.Window, 
+            nameof(Window),
+            o => o.Window,
             (o, v) => o.Window = v);
 
     /// <summary>
@@ -93,11 +103,12 @@ public class RootDock : DockBase, IRootDock
     /// </summary>
     public static readonly DirectProperty<RootDock, IList<IDockWindow>?> WindowsProperty =
         AvaloniaProperty.RegisterDirect<RootDock, IList<IDockWindow>?>(
-            nameof(Windows), 
-            o => o.Windows, 
+            nameof(Windows),
+            o => o.Windows,
             (o, v) => o.Windows = v);
 
     private bool _isFocusableRoot;
+    private bool _enableGlobalDocking;
     private IList<IDockable>? _hiddenDockables;
     private IList<IDockable>? _leftPinnedDockables;
     private IList<IDockable>? _rightPinnedDockables;
@@ -113,6 +124,7 @@ public class RootDock : DockBase, IRootDock
     public RootDock()
     {
         _isFocusableRoot = true;
+        _enableGlobalDocking = true;
         _hiddenDockables = new AvaloniaList<IDockable>();
         _leftPinnedDockables = new AvaloniaList<IDockable>();
         _rightPinnedDockables = new AvaloniaList<IDockable>();
@@ -130,6 +142,15 @@ public class RootDock : DockBase, IRootDock
     {
         get => _isFocusableRoot;
         set => SetAndRaise(IsFocusableRootProperty, ref _isFocusableRoot, value);
+    }
+
+    /// <inheritdoc/>
+    [DataMember(IsRequired = false, EmitDefaultValue = true)]
+    [JsonPropertyName("EnableGlobalDocking")]
+    public bool EnableGlobalDocking
+    {
+        get => _enableGlobalDocking;
+        set => SetAndRaise(EnableGlobalDockingProperty, ref _enableGlobalDocking, value);
     }
 
     /// <inheritdoc/>

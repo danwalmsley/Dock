@@ -23,7 +23,7 @@ internal abstract class DockManagerState : IDockManagerState
     protected AdornerHelper<DockTarget> LocalAdornerHelper { get; }
 
     protected AdornerHelper<GlobalDockTarget> GlobalAdornerHelper { get; }
- 
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DockManagerState"/> class.
     /// </summary>
@@ -46,11 +46,11 @@ internal abstract class DockManagerState : IDockManagerState
         }
 
         // Global dock target
-        if (DockSettings.EnableGlobalDocking && isGlobalValid && DropControl is { } dropControl)
+        if (isGlobalValid && DropControl is { } dropControl)
         {
             // Try to find DockControl ancestor - look through the visual tree more thoroughly
             var dockControl = dropControl.FindAncestorOfType<DockControl>();
-            
+
             // If not found directly, walk up the visual tree manually
             if (dockControl is null)
             {
@@ -65,7 +65,7 @@ internal abstract class DockManagerState : IDockManagerState
                     current = current.GetVisualParent();
                 }
             }
-            
+
             if (dockControl is not null)
             {
                 var indicatorsOnly = DockProperties.GetShowDockIndicatorOnly(dropControl);
@@ -84,11 +84,11 @@ internal abstract class DockManagerState : IDockManagerState
         }
 
         // Global dock target
-        if (DockSettings.EnableGlobalDocking && DropControl is { } dropControl)
+        if (DropControl is { } dropControl)
         {
             // Try to find DockControl ancestor - look through the visual tree more thoroughly
             var dockControl = dropControl.FindAncestorOfType<DockControl>();
-            
+
             // If not found directly, walk up the visual tree manually
             if (dockControl is null)
             {
@@ -103,7 +103,7 @@ internal abstract class DockManagerState : IDockManagerState
                     current = current.GetVisualParent();
                 }
             }
-            
+
             if (dockControl is not null)
             {
                 GlobalAdornerHelper.RemoveAdorner(dockControl);

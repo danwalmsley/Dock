@@ -16,6 +16,7 @@ namespace Dock.Model.Inpc.Controls;
 public class RootDock : DockBase, IRootDock
 {
     private bool _isFocusableRoot = true;
+    private bool _enableGlobalDocking = true;
     private IList<IDockable>? _hiddenDockables;
     private IList<IDockable>? _leftPinnedDockables;
     private IList<IDockable>? _rightPinnedDockables;
@@ -40,6 +41,14 @@ public class RootDock : DockBase, IRootDock
     {
         get => _isFocusableRoot;
         set => SetProperty(ref _isFocusableRoot, value);
+    }
+
+    /// <inheritdoc/>
+    [DataMember(IsRequired = false, EmitDefaultValue = true)]
+    public bool EnableGlobalDocking
+    {
+        get => _enableGlobalDocking;
+        set => SetProperty(ref _enableGlobalDocking, value);
     }
 
     /// <inheritdoc/>
