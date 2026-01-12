@@ -118,17 +118,32 @@
           <Grid x:Name="PART_Grid"
                 IsVisible="{Binding #PART_TabStrip.IsVisible}" />
           <Border x:Name="PART_Border">
-            <DockableControl DataContext="{Binding ActiveDockable}"
-                             TrackingMode="Visible">
-              <ContentControl x:Name="PART_ContentPresenter"
-                              Content="{Binding}"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch">
-                <ContentControl.ContentTemplate>
-                  <ControlRecyclingDataTemplate Parent="{Binding #PART_ContentPresenter}" />
-                </ContentControl.ContentTemplate>
-              </ContentControl>
-            </DockableControl>
+            <ItemsControl ItemsSource="{Binding VisibleDockables}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <Grid />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="core:IDockable">
+                  <DockableControl TrackingMode="Visible">
+                    <DockableControl.IsVisible>
+                      <MultiBinding Converter="{x:Static converters:ReferenceEqualsMultiConverter.Instance}">
+                        <Binding />
+                        <Binding Path="((core:IDock)Owner).ActiveDockable" />
+                      </MultiBinding>
+                    </DockableControl.IsVisible>
+                    <ContentControl HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Content="{Binding}">
+                      <ContentControl.ContentTemplate>
+                        <ControlRecyclingDataTemplate Parent="{Binding $self}" />
+                      </ContentControl.ContentTemplate>
+                    </ContentControl>
+                  </DockableControl>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </Border>
         </DockPanel>
       </ControlTemplate>
