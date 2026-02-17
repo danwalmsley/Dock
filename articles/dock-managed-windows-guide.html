@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Managed Windows Guide | Dock for Avalonia </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Managed Windows Guide | Dock for Avalonia ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/danwalmsley/Dock/blob/master/docfx/articles/dock-managed-windows-guide.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../images/logo.svg" alt="">
+            
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="managed-windows-guide">Managed Windows Guide</h1>
+
+<p>Managed windows host floating docks inside the main window instead of spawning native OS windows. When enabled, Dock uses the in-app MDI layer to render floating windows as <code>MdiDocumentWindow</code> controls.</p>
+<h2 id="when-to-use-managed-windows">When to use managed windows</h2>
+<p>Managed windows are useful when:</p>
+<ul>
+<li>Your app should stay inside a single top-level window.</li>
+<li>You want consistent window chrome across platforms.</li>
+<li>Native window restrictions or airspace issues make OS windows undesirable.</li>
+</ul>
+<p>The main window is still an OS window. Managed windows affect only floating dock windows.</p>
+<h2 id="how-managed-windows-work">How managed windows work</h2>
+<ol>
+<li><code>DockSettings.UseManagedWindows</code> switches floating windows to <code>ManagedHostWindow</code>.</li>
+<li><code>DockControl</code> registers its <code>ManagedWindowLayer</code> with the factory when <code>EnableManagedWindowLayer</code> is true.</li>
+<li><code>ManagedHostWindow</code> creates a <code>ManagedDockWindowDocument</code> that wraps the <code>IDockWindow</code> model.</li>
+<li><code>ManagedWindowLayer</code> renders managed windows using <code>MdiLayoutPanel</code> and <code>MdiDocumentWindow</code>.</li>
+</ol>
+<p>The managed windows remain in the main visual tree so they can share styles and resources with the rest of the app.</p>
+<h2 id="interaction-parity">Interaction parity</h2>
+<p>Managed windows reuse the same interaction model as native windows:</p>
+<ul>
+<li>Dragging and resizing are handled by <code>MdiDocumentWindow</code> and its layout manager.</li>
+<li>Dock targets, drag previews, and pinned windows are rendered inside the managed layer.</li>
+<li>Window magnetism and bring-to-front behavior apply within the managed layer.</li>
+</ul>
+<h2 id="differences-from-native-windows">Differences from native windows</h2>
+<p>Managed windows are not OS windows:</p>
+<ul>
+<li>They do not appear in the taskbar or window switchers.</li>
+<li>They cannot be moved outside the main window or across monitors.</li>
+<li>Owner relationships and OS-level z-order do not apply; ordering uses <code>MdiZIndex</code>.</li>
+</ul>
+<h2 id="theming-and-templates">Theming and templates</h2>
+<p><code>ManagedWindowLayer</code> is part of the <code>DockControl</code> template and must be named <code>PART_ManagedWindowLayer</code>. If you replace the template, include the layer and keep <code>EnableManagedWindowLayer</code> set to <code>true</code> so floating windows remain visible.</p>
+<h2 id="related-articles">Related articles</h2>
+<ul>
+<li><a href="dock-managed-windows-howto.html">Managed windows how-to</a></li>
+<li><a href="dock-managed-windows-reference.html">Managed windows reference</a></li>
+<li><a href="dock-windows.html">Floating windows</a></li>
+<li><a href="dock-mdi.html">MDI document layout</a></li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/danwalmsley/Dock/blob/master/docfx/articles/dock-managed-windows-guide.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
