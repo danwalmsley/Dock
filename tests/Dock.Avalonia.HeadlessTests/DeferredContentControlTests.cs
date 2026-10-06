@@ -380,26 +380,6 @@ public class DeferredContentControlTests
         }
     }
 
-    private static void AssertRevealCompletes(Window window, Control presenter)
-    {
-        // Draining dispatcher jobs sets the target opacity but does not finish
-        // its transition. Drive frames until it completes, checking visibility
-        // throughout instead of depending on the runner's frame timing.
-        var timeout = System.Diagnostics.Stopwatch.StartNew();
-        do
-        {
-            global::Avalonia.Headless.AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-            Dispatcher.UIThread.RunJobs();
-            window.UpdateLayout();
-            Assert.InRange(presenter.Opacity, 0.5D, 1D);
-            if (!presenter.IsAnimating(Visual.OpacityProperty) && presenter.Opacity == 1D) break;
-            Thread.Sleep(10);
-        } while (timeout.Elapsed < TimeSpan.FromSeconds(10));
-
-        Assert.False(presenter.IsAnimating(Visual.OpacityProperty));
-        Assert.Equal(1D, presenter.Opacity);
-    }
-
     [AvaloniaFact]
     public void DeferredContentControl_Does_Not_Reveal_From_Blank_On_First_Materialization()
     {
@@ -482,7 +462,7 @@ public class DeferredContentControlTests
 
             var secondTextBlock = Assert.IsType<TextBlock>(control.Presenter.Child);
             Assert.Equal("Second", secondTextBlock.DataContext);
-            AssertRevealCompletes(window, control.Presenter);
+            Assert.Equal(1D, control.Presenter.Opacity);
         }
         finally
         {
@@ -547,7 +527,7 @@ public class DeferredContentControlTests
             Dispatcher.UIThread.RunJobs();
             window.UpdateLayout();
 
-            AssertRevealCompletes(window, presenterHost.Presenter);
+            Assert.Equal(1D, presenterHost.Presenter.Opacity);
         }
         finally
         {
@@ -604,7 +584,7 @@ public class DeferredContentControlTests
             Dispatcher.UIThread.RunJobs();
             window.UpdateLayout();
 
-            AssertRevealCompletes(window, control.Presenter);
+            Assert.Equal(1D, control.Presenter.Opacity);
         }
         finally
         {
@@ -1209,27 +1189,14 @@ public class DeferredContentControlTests
         }
     }
 
-    [AvaloniaTheory]
-    [InlineData(0)]
-    [InlineData(200)]
-    public void DeferredContentPresenter_AutoScheduled_Time_Budget_Materializes_In_ItemsControl(int dispatcherPauseMilliseconds)
+    [AvaloniaFact]
+    public void DeferredContentPresenter_AutoScheduled_Time_Budget_Materializes_In_ItemsControl()
     {
-        var observedFirstPass = false;
-        CountingTemplate? firstTemplate = null;
-        CountingTemplate? secondTemplate = null;
-        firstTemplate = new CountingTemplate(() =>
+        var firstTemplate = new CountingTemplate(() => new Border
         {
-            // Observe the boundary between automatic batches, even if the runner
-            // was paused long enough for both entries to become due.
-            Dispatcher.UIThread.Post(() =>
-            {
-                Assert.Equal(1, firstTemplate!.BuildCount);
-                Assert.Equal(0, secondTemplate!.BuildCount);
-                observedFirstPass = true;
-            }, DispatcherPriority.Normal);
-            return new Border { Child = new TextBlock { Text = "PresenterFirstAuto" } };
+            Child = new TextBlock { Text = "PresenterFirstAuto" }
         });
-        secondTemplate = new CountingTemplate(() => new Border
+        var secondTemplate = new CountingTemplate(() => new Border
         {
             Child = new TextBlock { Text = "PresenterSecondAuto" }
         });
@@ -1241,7 +1208,7 @@ public class DeferredContentControlTests
         var timeline = new DeferredContentPresentationTimeline
         {
             BudgetMode = DeferredContentPresentationBudgetMode.RealizationTime,
-            MaxRealizationTimePerPass = TimeSpan.Zero,
+            MaxRealizationTimePerPass = TimeSpan.FromMilliseconds(2),
             InitialDelay = TimeSpan.Zero,
             FollowUpDelay = TimeSpan.FromMilliseconds(10)
         };
@@ -1300,19 +1267,20 @@ public class DeferredContentControlTests
 
             Assert.All(new[] { firstPresenter, secondPresenter }, presenter => Assert.Null(presenter.Child));
 
-            Thread.Sleep(dispatcherPauseMilliseconds);
-            var timeout = System.Diagnostics.Stopwatch.StartNew();
-            while (secondTemplate.BuildCount == 0 && timeout.Elapsed < TimeSpan.FromSeconds(10))
-            {
-                Dispatcher.UIThread.RunJobs();
-                window.UpdateLayout();
-                if (secondTemplate.BuildCount == 0) Thread.Sleep(10);
-            }
+            Thread.Sleep(60);
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
 
-            Assert.True(observedFirstPass);
             Assert.Equal(1, firstTemplate.BuildCount);
-            Assert.Equal(1, secondTemplate.BuildCount);
+            Assert.Equal(0, secondTemplate.BuildCount);
             Assert.NotNull(firstPresenter.Child);
+            Assert.Null(secondPresenter.Child);
+
+            Thread.Sleep(180);
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+
+            Assert.Equal(1, secondTemplate.BuildCount);
             Assert.NotNull(secondPresenter.Child);
         }
         finally

@@ -1112,9 +1112,7 @@ internal static class DeferredContentPresentationTargetHelpers
         EnsureRevealTransition(control, revealDuration);
 
         control.Opacity = RevealStartingOpacity;
-        // Set the transition's local target. SetCurrentValue can update the active
-        // animation value instead, leaving the underlying opacity at 0.85.
-        Dispatcher.UIThread.Post(() => control.Opacity = 1D, DispatcherPriority.Background);
+        Dispatcher.UIThread.Post(() => control.SetCurrentValue(Visual.OpacityProperty, 1D), DispatcherPriority.Background);
     }
 
     private static void EnsureRevealTransition(Control control, TimeSpan revealDuration)
