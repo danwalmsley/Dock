@@ -83,14 +83,14 @@ public class DelayedUniformTabPanelTests
             $"Expansion happened too early after second close. Elapsed={elapsedSinceSecondClose.TotalMilliseconds:F0}ms Delay={panel.ExpansionDelay.TotalMilliseconds:F0}ms");
     }
 
-    private static async Task<TimeSpan> WaitForTabWidthAsync(DelayedUniformTabPanel panel, double expectedWidth, TimeSpan timeout)
+    private static async Task<TimeSpan> WaitForTabWidthAsync(DelayedUniformTabPanel panel, double expectedWidth, TimeSpan timeout, double viewportWidth = 1000)
     {
         var stopwatch = Stopwatch.StartNew();
 
         while (stopwatch.Elapsed < timeout)
         {
             Dispatcher.UIThread.RunJobs();
-            Layout(panel, 1000, 32);
+            Layout(panel, viewportWidth, 32);
 
             if (panel.Children.Count > 0 &&
                 Math.Abs(panel.Children[0].Bounds.Width - expectedWidth) <= 0.1)
@@ -122,9 +122,9 @@ public class DelayedUniformTabPanelTests
         Layout(panel, 600, 32);
         AssertTabWidth(panel, 122d);
 
-        await Task.Delay(80);
-        Dispatcher.UIThread.RunJobs();
-        Layout(panel, 600, 32);
+        // A wall-clock delay does not guarantee the dispatcher timer has run on a busy runner.
+        // Keep pumping the same viewport until expansion completes, with a bounded failure timeout.
+        await WaitForTabWidthAsync(panel, 197d, TimeSpan.FromSeconds(5), viewportWidth: 600);
         var expandedWidth = panel.Children[0].Bounds.Width;
         AssertTabWidth(panel, expandedWidth);
         Assert.InRange(expandedWidth, 197d, 199d);
